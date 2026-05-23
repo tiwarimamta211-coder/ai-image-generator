@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaMind AI — Creative Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b12;
+    --bg2: #0d1220;
+    --bg3: #111827;
+    --panel: #131c2e;
+    --panel2: #1a243a;
+    --border: rgba(99,130,200,0.13);
+    --border2: rgba(99,130,200,0.22);
+    --accent: #4f8ef7;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --accent-glow: rgba(79,142,247,0.18);
+    --text: #e8edf7;
+    --text2: #8fa0c0;
+    --text3: #5a6e90;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --success: #34d399;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --transition: 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── BACKGROUND MESH ─── */
+  .bg-mesh {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, rgba(79,142,247,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(167,139,250,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(52,211,153,0.03) 0%, transparent 60%);
+  }
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .topbar-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 19px; font-weight: 800;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 0 18px rgba(79,142,247,0.35);
+  }
+  .topbar-nav {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .nav-btn {
+    background: none; border: none;
+    color: var(--text2); font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; font-weight: 500;
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: var(--transition);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-btn:hover { background: var(--panel); color: var(--text); }
+  .nav-btn.active { background: rgba(79,142,247,0.12); color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .credit-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-radius: 40px;
+    padding: 6px 14px 6px 10px;
+    font-size: 13px;
+  }
+  .credit-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)}
+  }
+  .credit-count { font-weight: 600; color: var(--text); }
+  .credit-label { color: var(--text3); font-size: 12px; }
+  .btn-upgrade {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 8px 18px; border-radius: 40px;
+    cursor: pointer; transition: var(--transition);
+    box-shadow: 0 2px 18px rgba(79,142,247,0.3);
+  }
+  .btn-upgrade:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(79,142,247,0.45); }
+
+  /* ─── LAYOUT ─── */
+  .app-layout {
+    position: relative; z-index: 1;
+    display: flex; min-height: calc(100vh - 60px);
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 68px; flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 6px;
+    transition: width var(--transition);
+  }
+  .sidebar-item {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; border: none;
+    background: none; color: var(--text3);
+    font-size: 20px; gap: 3px;
+    transition: var(--transition);
+    position: relative;
+  }
+  .sidebar-item span { font-size: 9px; font-family: 'DM Sans', sans-serif; font-weight: 500; display: none; }
+  .sidebar-item:hover { background: var(--panel); color: var(--text); }
+  .sidebar-item.active { background: rgba(79,142,247,0.14); color: var(--accent); }
+  .sidebar-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 24px; border-radius: 0 4px 4px 0;
+    background: var(--accent);
+  }
+  .sidebar-sep { width: 32px; height: 1px; background: var(--border); margin: 6px 0; }
+
+  /* ─── MAIN CONTENT ─── */
+  .main-content {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column;
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    padding: 28px 32px 0;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .page-title span { color: var(--accent); }
+  .page-subtitle { color: var(--text2); font-size: 14px; margin-top: 4px; }
+  .page-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-ghost {
+    background: var(--panel); border: 1px solid var(--border2);
+    color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: var(--transition);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn-ghost:hover { background: var(--panel2); color: var(--text); border-color: var(--border2); }
+
+  /* ─── WORKSPACE ─── */
+  .workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 0;
+    padding: 24px 32px 32px;
+    min-height: 0;
+  }
+
+  /* ─── CONTROL PANEL ─── */
+  .control-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    height: fit-content;
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+  }
+  .control-panel::-webkit-scrollbar { width: 4px; }
+  .control-panel::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
+
+  .section-head {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--text3);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-body { padding: 18px 20px; }
+  .section-body + .section-head { border-top: 1px solid var(--border); }
+
+  /* Prompt Area */
+  .prompt-wrap { position: relative; }
+  .prompt-area {
+    width: 100%; min-height: 120px;
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    padding: 14px; resize: vertical; outline: none;
+    transition: border-color var(--transition);
+    line-height: 1.6;
+  }
+  .prompt-area:focus { border-color: var(--accent); }
+  .prompt-area::placeholder { color: var(--text3); }
+  .prompt-tools {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px;
+  }
+  .prompt-hints { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hint-chip {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px;
+    font-size: 11.5px; color: var(--text2); cursor: pointer;
+    transition: var(--transition);
+  }
+  .hint-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .char-count { font-size: 11px; color: var(--text3); }
+
+  /* Negative Prompt */
+  .neg-prompt {
+    width: 100%; min-height: 60px;
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 13px;
+    padding: 10px 14px; resize: vertical; outline: none;
+    transition: border-color var(--transition);
+  }
+  .neg-prompt:focus { border-color: rgba(248,113,113,0.5); }
+  .neg-prompt::placeholder { color: var(--text3); }
+
+  /* Form Controls */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    font-size: 12.5px; font-weight: 500; color: var(--text2);
+    margin-bottom: 7px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .field-value { color: var(--accent); font-weight: 600; }
+  .select-input {
+    width: 100%; background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+    padding: 9px 12px; outline: none; cursor: pointer;
+    transition: border-color var(--transition); appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238fa0c0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .select-input:focus { border-color: var(--accent); }
+
+  .range-input {
+    width: 100%; appearance: none;
+    height: 4px; border-radius: 4px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct, 50%), var(--bg) var(--pct, 50%), var(--bg) 100%);
+    outline: none; cursor: pointer;
+  }
+  .range-input::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--accent);
+    border: 3px solid var(--bg2);
+    box-shadow: 0 0 10px rgba(79,142,247,0.5);
+    cursor: pointer;
+  }
+
+  /* Size Presets */
+  .size-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px;
+  }
+  .size-btn {
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 9px 6px;
+    color: var(--text2); font-size: 11.5px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; text-align: center; transition: var(--transition);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .size-btn:hover { border-color: var(--accent); color: var(--text); }
+  .size-btn.active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .size-icon { font-size: 16px; }
+  .size-label { font-weight: 500; font-size: 10.5px; }
+  .size-dim { font-size: 10px; color: var(--text3); }
+
+  /* Style Presets */
+  .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .style-btn {
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 6px;
+    cursor: pointer; text-align: center; transition: var(--transition);
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .style-btn:hover { border-color: var(--accent2); }
+  .style-btn.active { border-color: var(--accent2); background: rgba(167,139,250,0.1); }
+  .style-emoji { font-size: 18px; }
+  .style-name { font-size: 10.5px; color: var(--text2); font-weight: 500; }
+  .style-btn.active .style-name { color: var(--accent2); }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .toggle-row:last-child { margin-bottom: 0; }
+  .toggle-info { display: flex; flex-direction: column; }
+  .toggle-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .toggle-desc { font-size: 11.5px; color: var(--text3); }
+  .toggle-switch {
+    width: 38px; height: 22px;
+    background: var(--bg); border-radius: 20px;
+    border: 1.5px solid var(--border2);
+    cursor: pointer; position: relative;
+    transition: background var(--transition);
+    flex-shrink: 0;
+  }
+  .toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+  .toggle-switch::after {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; background: #fff; border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle-switch.on::after { transform: translateX(16px); }
+
+  /* Generate Button */
+  .gen-section { padding: 16px 20px 20px; border-top: 1px solid var(--border); }
+  .credit-preview {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg3); border-radius: var(--radius-sm);
+    padding: 10px 14px; margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .credit-preview-label { font-size: 12.5px; color: var(--text2); }
+  .credit-preview-cost { font-size: 13px; font-weight: 600; color: var(--warn); display: flex; align-items: center; gap: 5px; }
+  .btn-generate {
+    width: 100%;
+    background: linear-gradient(135deg, #4f8ef7, #7c6ef7);
+    border: none; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    padding: 14px 24px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 4px 24px rgba(79,142,247,0.35);
+    position: relative; overflow: hidden;
+    letter-spacing: 0.3px;
+  }
+  .btn-generate::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
+    opacity: 0; transition: opacity var(--transition);
+  }
+  .btn-generate:hover::before { opacity: 1; }
+  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,142,247,0.45); }
+  .btn-generate:active { transform: translateY(0); }
+  .btn-generate:disabled {
+    opacity: 0.6; cursor: not-allowed;
+    transform: none; box-shadow: none;
+  }
+
+  /* ─── OUTPUT PANEL ─── */
+  .output-panel {
+    padding-left: 24px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 12.5px; color: var(--text2);
+  }
+  .status-chip.active { border-color: var(--accent); color: var(--accent); }
+  .status-chip.done { border-color: var(--success); color: var(--success); }
+
+  /* Canvas */
+  .canvas-area {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    position: relative; overflow: hidden;
+    min-height: 480px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .canvas-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 40px;
+    text-align: center;
+  }
+  .canvas-empty-icon {
+    width: 72px; height: 72px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .canvas-empty-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+  .canvas-empty-sub { color: var(--text3); font-size: 13.5px; max-width: 300px; }
+  .canvas-grid {
+    display: grid; gap: 12px; padding: 20px; width: 100%;
+  }
+  .canvas-grid.cols-1 { grid-template-columns: 1fr; }
+  .canvas-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .canvas-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .image-card {
+    position: relative; border-radius: 10px; overflow: hidden;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    aspect-ratio: 1;
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .image-card:hover { transform: scale(1.02); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  .image-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .image-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(8,11,18,0.9) 0%, transparent 60%);
+    opacity: 0; transition: opacity var(--transition);
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 14px;
+    gap: 8px;
+  }
+  .image-card:hover .image-card-overlay { opacity: 1; }
+  .image-actions { display: flex; gap: 6px; }
+  .img-btn {
+    flex: 1; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    padding: 7px 4px; border-radius: 6px; cursor: pointer;
+    transition: background var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .img-btn:hover { background: rgba(255,255,255,0.2); }
+  .img-btn.primary { background: rgba(79,142,247,0.7); border-color: transparent; }
+  .img-btn.primary:hover { background: rgba(79,142,247,0.9); }
+
+  /* Progress */
+  .progress-wrap {
+    position: absolute; inset: 0;
+    background: var(--panel);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px;
+  }
+  .progress-animation {
+    width: 100px; height: 100px; position: relative;
+  }
+  .progress-ring {
+    animation: spin 1.5s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .progress-ring-bg { stroke: var(--panel2); }
+  .progress-ring-fill {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease;
+  }
+  .progress-pct {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent);
+  }
+  .progress-label { color: var(--text2); font-size: 14px; font-weight: 500; }
+  .progress-step { color: var(--text3); font-size: 12px; }
+
+  /* History Strip */
+  .history-strip {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+  }
+  .history-title {
+    font-size: 12px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .history-images {
+    display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+  }
+  .history-images::-webkit-scrollbar { height: 3px; }
+  .history-images::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
+  .history-thumb {
+    width: 80px; height: 80px; flex-shrink: 0;
+    border-radius: 8px; overflow: hidden;
+    border: 2px solid var(--border);
+    cursor: pointer; transition: var(--transition);
+    background: var(--bg3);
+  }
+  .history-thumb:hover { border-color: var(--accent); transform: scale(1.05); }
+  .history-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .history-empty { color: var(--text3); font-size: 13px; padding: 8px 0; }
+
+  /* ─── MODAL ─── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(8,11,18,0.85); backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border2);
+    border-radius: 18px; max-width: 680px; width: 92%; max-height: 90vh;
+    overflow-y: auto; transform: scale(0.95) translateY(16px);
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+  .modal-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .modal-close:hover { background: var(--panel2); color: var(--text); }
+  .modal-body { padding: 24px; }
+  .modal-img { width: 100%; border-radius: 10px; margin-bottom: 18px; }
+  .modal-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+  .meta-item {
+    background: var(--bg3); border-radius: 8px; padding: 10px 14px;
+    border: 1px solid var(--border);
+  }
+  .meta-key { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .meta-val { font-size: 13px; color: var(--text); font-weight: 500; }
+  .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-modal {
+    flex: 1; min-width: 120px;
+    background: var(--bg3); border: 1.5px solid var(--border2);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500;
+    padding: 10px 16px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: var(--transition);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-modal:hover { background: var(--panel2); border-color: var(--accent); color: var(--accent); }
+  .btn-modal.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent; color: #fff;
+  }
+  .btn-modal.primary:hover { opacity: 0.9; border-color: transparent; }
+
+  /* ─── TOAST ─── */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--panel2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 12px 18px;
+    color: var(--text); font-size: 13.5px;
+    display: flex; align-items: center; gap: 10px;
+    max-width: 320px;
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: all;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  .toast.warn { border-left: 3px solid var(--warn); }
+
+  /* ─── CREDIT MODAL ─── */
+  .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+  .plan-card {
+    background: var(--bg3); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    cursor: pointer; transition: var(--transition);
+    text-align: center;
+  }
+  .plan-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .plan-card.featured { border-color: var(--accent); background: rgba(79,142,247,0.05); }
+  .plan-badge { font-size: 10px; background: var(--accent); color: #fff; border-radius: 4px; padding: 2px 8px; font-weight: 700; text-transform: uppercase; width: fit-content; margin: 0 auto; }
+  .plan-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; }
+  .plan-credits { font-size: 28px; font-weight: 800; color: var(--accent); font-family: 'Syne', sans-serif; }
+  .plan-price { font-size: 12px; color: var(--text2); }
+  .plan-features { font-size: 12px; color: var(--text3); line-height: 1.8; }
+  .btn-plan {
+    width: 100%; background: var(--panel2); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 9px; border-radius: 8px; cursor: pointer; transition: var(--transition);
+    margin-top: 4px;
+  }
+  .plan-card.featured .btn-plan { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; color: #fff; }
+  .btn-plan:hover { opacity: 0.85; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .workspace { grid-template-columns: 300px 1fr; }
+  }
+  @media (max-width: 900px) {
+    .workspace {
+      grid-template-columns: 1fr;
+      padding: 16px 16px 24px;
+    }
+    .output-panel { padding-left: 0; }
+    .sidebar { display: none; }
+    .topbar-nav { display: none; }
+    .canvas-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .modal-meta { grid-template-columns: 1fr; }
+    .plan-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .topbar { padding: 0 16px; }
+    .page-header { padding: 20px 16px 0; }
+    .credit-label { display: none; }
+    .btn-upgrade { padding: 7px 12px; font-size: 12px; }
+    .canvas-grid.cols-2 { grid-template-columns: 1fr; }
+    .canvas-grid.cols-4 { grid-template-columns: 1fr; }
+    .modal-actions { flex-direction: column; }
+  }
+
+  /* ─── UTILITIES ─── */
+  .hidden { display: none !important; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-8 { gap: 8px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.2);
+    color: var(--accent); border-radius: 20px; padding: 3px 10px; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="grid-overlay"></div>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">✦</div>
+    NovaMind
+  </div>
+  <div class="topbar-nav">
+    <button class="nav-btn active">🖼 Image Gen</button>
+    <button class="nav-btn">✍️ Text</button>
+    <button class="nav-btn">🎵 Audio</button>
+    <button class="nav-btn">🎬 Video</button>
+    <button class="nav-btn">🧠 Chat</button>
+  </div>
+  <div class="topbar-right">
+    <div class="credit-badge" id="creditBadge">
+      <div class="credit-dot"></div>
+      <span class="credit-count" id="creditDisplay">250</span>
+      <span class="credit-label">credits</span>
+    </div>
+    <button class="btn-upgrade" id="btnUpgrade">⚡ Upgrade</button>
+  </div>
+</nav>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <button class="sidebar-item active" title="Image Generator">🖼️</button>
+    <button class="sidebar-item" title="Text Generator">✍️</button>
+    <button class="sidebar-item" title="Audio Generator">🎵</button>
+    <button class="sidebar-item" title="Video Generator">🎬</button>
+    <div class="sidebar-sep"></div>
+    <button class="sidebar-item" title="Gallery">🗂️</button>
+    <button class="sidebar-item" title="Templates">📐</button>
+    <button class="sidebar-item" title="History">🕑</button>
+    <div class="sidebar-sep"></div>
+    <button class="sidebar-item" title="Settings">⚙️</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">AI <span>Image</span> Generator</div>
+        <div class="page-subtitle">Transform your imagination into stunning visuals with advanced AI models</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn-ghost" id="btnHistory">🕑 History</button>
+        <button class="btn-ghost" id="btnGallery">🗂 Gallery</button>
+      </div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+
+      <!-- CONTROL PANEL -->
+      <div class="control-panel">
+        <!-- Prompt -->
+        <div class="section-head">
+          <span>✦ PROMPT</span>
+          <span class="tag">💡 Smart</span>
+        </div>
+        <div class="section-body">
+          <div class="prompt-wrap">
+            <textarea id="promptInput" class="prompt-area" placeholder="Describe your image… e.g. 'A glowing ancient temple in a misty rainforest at dusk, ultra-detailed, cinematic lighting'"></textarea>
+          </div>
+          <div class="prompt-tools">
+            <div class="prompt-hints">
+              <span class="hint-chip" data-hint="cinematic lighting">🎬 cinematic</span>
+              <span class="hint-chip" data-hint="photorealistic, 8K">📷 photo</span>
+              <span class="hint-chip" data-hint="digital art, trending">🎨 art</span>
+              <span class="hint-chip" data-hint="fantasy, ethereal">✨ fantasy</span>
+            </div>
+            <span class="char-count" id="charCount">0 / 500</span>
+          </div>
+          <div style="margin-top:12px">
+            <div class="field-label">Negative Prompt <span style="color:var(--text3);font-size:11px;font-weight:400">— what to exclude</span></div>
+            <textarea id="negPrompt" class="neg-prompt" placeholder="blurry, deformed, watermark, low quality, cropped…"></textarea>
+          </div>
+        </div>
+
+        <!-- Model -->
+        <div class="section-head">⚙️ MODEL & SETTINGS</div>
+        <div class="section-body">
+          <div class="field">
+            <div class="field-label">AI Model</div>
+            <select id="modelSelect" class="select-input">
+              <option value="sdxl">Stable Diffusion XL — 3 credits</option>
+              <option value="flux">FLUX.1 Pro — 6 credits</option>
+              <option value="dalle3">DALL·E 3 — 8 credits</option>
+              <option value="midjourney">Midjourney v6 — 10 credits</option>
+              <option value="adobe">Adobe Firefly — 5 credits</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">Sampler</div>
+            <select id="samplerSelect" class="select-input">
+              <option>DPM++ 2M Karras</option>
+              <option>Euler a</option>
+              <option>DDIM</option>
+              <option>UniPC</option>
+              <option>LCM</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span>CFG Scale</span>
+              <span class="field-value" id="cfgVal">7.0</span>
+            </div>
+            <input type="range" id="cfgRange" class="range-input" min="1" max="20" step="0.5" value="7">
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span>Steps</span>
+              <span class="field-value" id="stepsVal">30</span>
+            </div>
+            <input type="range" id="stepsRange" class="range-input" min="10" max="100" step="5" value="30">
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span>Seed</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input type="number" id="seedInput" class="select-input" placeholder="-1 (random)" value="-1" style="flex:1">
+              <button class="btn-ghost" id="randomSeed" style="padding:8px 12px;flex-shrink:0">🎲</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Size -->
+        <div class="section-head">📐 IMAGE SIZE</div>
+        <div class="section-body">
+          <div class="size-grid">
+            <button class="size-btn active" data-w="1024" data-h="1024">
+              <span class="size-icon">⬛</span>
+              <span class="size-label">Square</span>
+              <span class="size-dim">1024×1024</span>
+            </button>
+            <button class="size-btn" data-w="1792" data-h="1024">
+              <span class="size-icon">🔲</span>
+              <span class="size-label">Landscape</span>
+              <span class="size-dim">1792×1024</span>
+            </button>
+            <button class="size-btn" data-w="1024" data-h="1792">
+              <span class="size-icon">▬</span>
+              <span class="size-label">Portrait</span>
+              <span class="size-dim">1024×1792</span>
+            </button>
+            <button class="size-btn" data-w="1280" data-h="720">
+              <span class="size-icon">🖥</span>
+              <span class="size-label">HD 16:9</span>
+              <span class="size-dim">1280×720</span>
+            </button>
+            <button class="size-btn" data-w="2560" data-h="1440">
+              <span class="size-icon">🖥</span>
+              <span class="size-label">QHD</span>
+              <span class="size-dim">2560×1440</span>
+            </button>
+            <button class="size-btn" data-w="custom">
+              <span class="size-icon">✏️</span>
+              <span class="size-label">Custom</span>
+              <span class="size-dim">W × H</span>
+            </button>
+          </div>
+          <div id="customSizeRow" style="display:none;margin-top:10px;display:none;gap:8px">
+            <input type="number" placeholder="Width" class="select-input" id="customW" style="flex:1">
+            <input type="number" placeholder="Height" class="select-input" id="customH" style="flex:1">
+          </div>
+        </div>
+
+        <!-- Style Presets -->
+        <div class="section-head">🎨 STYLE PRESETS</div>
+        <div class="section-body">
+          <div class="style-grid">
+            <button class="style-btn active" data-style="none">
+              <span class="style-emoji">🪄</span>
+              <span class="style-name">None</span>
+            </button>
+            <button class="style-btn" data-style="photorealistic">
+              <span class="style-emoji">📸</span>
+              <span class="style-name">Photo</span>
+            </button>
+            <button class="style-btn" data-style="anime">
+              <span class="style-emoji">🌸</span>
+              <span class="style-name">Anime</span>
+            </button>
+            <button class="style-btn" data-style="oil-painting">
+              <span class="style-emoji">🖼</span>
+              <span class="style-name">Oil Paint</span>
+            </button>
+            <button class="style-btn" data-style="watercolor">
+              <span class="style-emoji">🎨</span>
+              <span class="style-name">Watercolor</span>
+            </button>
+            <button class="style-btn" data-style="3d-render">
+              <span class="style-emoji">💎</span>
+              <span class="style-name">3D Render</span>
+            </button>
+            <button class="style-btn" data-style="cyberpunk">
+              <span class="style-emoji">🌆</span>
+              <span class="style-name">Cyberpunk</span>
+            </button>
+            <button class="style-btn" data-style="fantasy">
+              <span class="style-emoji">🧙</span>
+              <span class="style-name">Fantasy</span>
+            </button>
+            <button class="style-btn" data-style="comic">
+              <span class="style-emoji">💥</span>
+              <span class="style-name">Comic</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Batch & Advanced -->
+        <div class="section-head">🔢 BATCH & OUTPUT</div>
+        <div class="section-body">
+          <div class="field">
+            <div class="field-label">
+              <span>Number of Images</span>
+              <span class="field-value" id="batchVal">1</span>
+            </div>
+            <input type="range" id="batchRange" class="range-input" min="1" max="4" step="1" value="1">
+          </div>
+          <div class="field">
+            <div class="field-label">Output Format</div>
+            <select id="formatSelect" class="select-input">
+              <option>PNG — High Quality</option>
+              <option>JPEG — Compressed</option>
+              <option>WebP — Modern</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="section-head">🛠 ADVANCED OPTIONS</div>
+        <div class="section-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title">High Resolution</span>
+              <span class="toggle-desc">2× upscale via AI enhancement</span>
+            </div>
+            <div class="toggle-switch" id="toggleHR" data-state="off"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title">Face Restoration</span>
+              <span class="toggle-desc">Fix & enhance faces (GFPGAN)</span>
+            </div>
+            <div class="toggle-switch on" id="toggleFace" data-state="on"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title">Safety Filter</span>
+              <span class="toggle-desc">Filter NSFW content</span>
+            </div>
+            <div class="toggle-switch on" id="toggleSafe" data-state="on"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title">Auto-Enhance Prompt</span>
+              <span class="toggle-desc">AI improves your prompt</span>
+            </div>
+            <div class="toggle-switch" id="toggleEnhance" data-state="off"></div>
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <div class="gen-section">
+          <div class="credit-preview">
+            <span class="credit-preview-label">💳 Generation cost</span>
+            <span class="credit-preview-cost" id="costPreview">⚡ 3 credits</span>
+          </div>
+          <button class="btn-generate" id="btnGenerate">
+            <span id="genBtnText">✦ Generate Image</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OUTPUT PANEL -->
+      <div class="output-panel">
+        <!-- Status -->
+        <div class="status-bar">
+          <div class="status-chip" id="statusChip">⭕ Ready to generate</div>
+          <div class="status-chip" id="modelChip">🤖 SDXL</div>
+          <div class="status-chip" id="sizeChip">📐 1024×1024</div>
+          <div class="status-chip" id="batchChip">🔢 1 image</div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-area" id="canvasArea">
+          <!-- Empty state -->
+          <div class="canvas-empty" id="emptyState">
+            <div class="canvas-empty-icon">✦</div>
+            <div class="canvas-empty-title">Your canvas awaits</div>
+            <div class="canvas-empty-sub">Configure your settings on the left and hit Generate — your AI creations will appear here</div>
+          </div>
+
+          <!-- Progress overlay (hidden by default) -->
+          <div class="progress-wrap hidden" id="progressWrap">
+            <div class="progress-animation">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle class="progress-ring-bg" cx="50" cy="50" r="42" fill="none" stroke-width="6"/>
+                <circle class="progress-ring-fill" id="progressCircle" cx="50" cy="50" r="42" fill="none" stroke-width="6"
+                  stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+              </svg>
+              <div class="progress-pct" id="progressPct">0%</div>
+            </div>
+            <div class="progress-label" id="progressLabel">Initializing AI model…</div>
+            <div class="progress-step" id="progressStep">Step 0 / 30</div>
+          </div>
+
+          <!-- Image grid (hidden by default) -->
+          <div id="imageGrid" class="canvas-grid cols-1" style="display:none"></div>
+        </div>
+
+        <!-- History -->
+        <div class="history-strip">
+          <div class="history-title">Recent Generations</div>
+          <div class="history-images" id="historyImages">
+            <div class="history-empty">No generations yet — your history will appear here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- IMAGE DETAIL MODAL -->
+<div class="modal-backdrop" id="imageModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🖼 Image Details</div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <img id="modalImg" class="modal-img" src="" alt="Generated image">
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-actions">
+        <button class="btn-modal primary" id="btnDownload">⬇ Download PNG</button>
+        <button class="btn-modal" id="btnVariation">🎲 Variation</button>
+        <button class="btn-modal" id="btnUpscale">🔍 Upscale 2×</button>
+        <button class="btn-modal" id="btnShare">🔗 Copy Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-backdrop" id="upgradeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚡ Upgrade Credits</div>
+      <button class="modal-close" id="upgradeClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text2);font-size:14px">Unlock more creative power with NovaMind credits.</p>
+      <div class="plan-grid">
+        <div class="plan-card" onclick="addCredits(100)">
+          <div class="plan-name">Starter</div>
+          <div class="plan-credits">100</div>
+          <div class="plan-price">$4.99</div>
+          <div class="plan-features">Basic models<br>PNG export<br>7 day history</div>
+          <button class="btn-plan">Buy Now</button>
+        </div>
+        <div class="plan-card featured" onclick="addCredits(500)">
+          <div class="plan-badge">Best Value</div>
+          <div class="plan-name">Creator</div>
+          <div class="plan-credits">500</div>
+          <div class="plan-price">$14.99</div>
+          <div class="plan-features">All models<br>Priority queue<br>30 day history</div>
+          <button class="btn-plan">Buy Now</button>
+        </div>
+        <div class="plan-card" onclick="addCredits(2000)">
+          <div class="plan-name">Pro</div>
+          <div class="plan-credits">2000</div>
+          <div class="plan-price">$49.99</div>
+          <div class="plan-features">All models + API<br>Commercial use<br>Unlimited history</div>
+          <button class="btn-plan">Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ─── STATE ─── */
+const state = {
+  credits: 250,
+  generating: false,
+  images: [],
+  history: [],
+  selectedModel: 'sdxl',
+  selectedSize: { w: 1024, h: 1024 },
+  selectedStyle: 'none',
+  batch: 1,
+  currentImage: null,
+};
+
+const MODEL_COSTS = { sdxl: 3, flux: 6, dalle3: 8, midjourney: 10, adobe: 5 };
+const MODEL_NAMES = { sdxl: 'SDXL', flux: 'FLUX.1', dalle3: 'DALL·E 3', midjourney: 'MJ v6', adobe: 'Firefly' };
+
+/* ─── PLACEHOLDER IMAGES (picsum) ─── */
+const PLACEHOLDER_BASE = 'https://picsum.photos/seed/';
+const seeds = ['nova1','cosmic2','dream3','art4','sky5','forest6','ocean7','city8','light9','dark0'];
+let seedIndex = 0;
+function nextPlaceholder(w = 512, h = 512) {
+  const seed = seeds[seedIndex++ % seeds.length] + Date.now();
+  return `https://picsum.photos/seed/${seed}/${w}/${h}`;
+}
+
+/* ─── RANGE SLIDERS ─── */
+function setupRange(rangeId, displayId, decimals = 0) {
+  const range = document.getElementById(rangeId);
+  const display = document.getElementById(displayId);
+  function update() {
+    const val = parseFloat(range.value);
+    display.textContent = decimals ? val.toFixed(decimals) : val;
+    const pct = ((val - range.min) / (range.max - range.min)) * 100;
+    range.style.setProperty('--pct', pct + '%');
+  }
+  range.addEventListener('input', update);
+  update();
+}
+setupRange('cfgRange', 'cfgVal', 1);
+setupRange('stepsRange', 'stepsVal');
+setupRange('batchRange', 'batchVal');
+
+document.getElementById('batchRange').addEventListener('input', function() {
+  state.batch = parseInt(this.value);
+  updateCostPreview();
+  document.getElementById('batchChip').textContent = `🔢 ${state.batch} image${state.batch > 1 ? 's' : ''}`;
+});
+
+/* ─── MODEL SELECT ─── */
+document.getElementById('modelSelect').addEventListener('change', function() {
+  state.selectedModel = this.value;
+  updateCostPreview();
+  document.getElementById('modelChip').textContent = `🤖 ${MODEL_NAMES[state.selectedModel]}`;
+});
+
+function updateCostPreview() {
+  const cost = MODEL_COSTS[state.selectedModel] * state.batch;
+  document.getElementById('costPreview').textContent = `⚡ ${cost} credits`;
+}
+
+/* ─── PROMPT ─── */
+const promptInput = document.getElementById('promptInput');
+promptInput.addEventListener('input', function() {
+  const len = this.value.length;
+  document.getElementById('charCount').textContent = `${len} / 500`;
+  if (len > 500) this.value = this.value.slice(0, 500);
+});
+
+/* Hint chips */
+document.querySelectorAll('.hint-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const hint = chip.dataset.hint;
+    const curr = promptInput.value.trim();
+    promptInput.value = curr ? `${curr}, ${hint}` : hint;
+    promptInput.dispatchEvent(new Event('input'));
+  });
+});
+
+/* ─── SIZE BUTTONS ─── */
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const w = btn.dataset.w, h = btn.dataset.h;
+    const customRow = document.getElementById('customSizeRow');
+    if (w === 'custom') {
+      customRow.style.display = 'flex';
+    } else {
+      customRow.style.display = 'none';
+      state.selectedSize = { w: parseInt(w), h: parseInt(h) };
+      document.getElementById('sizeChip').textContent = `📐 ${w}×${h}`;
+    }
+  });
+});
+
+/* ─── STYLE BUTTONS ─── */
+document.querySelectorAll('.style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.selectedStyle = btn.dataset.style;
+  });
+});
+
+/* ─── TOGGLES ─── */
+document.querySelectorAll('.toggle-switch').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const isOn = toggle.dataset.state === 'on';
+    toggle.dataset.state = isOn ? 'off' : 'on';
+    toggle.classList.toggle('on', !isOn);
+  });
+});
+
+/* ─── RANDOM SEED ─── */
+document.getElementById('randomSeed').addEventListener('click', () => {
+  document.getElementById('seedInput').value = Math.floor(Math.random() * 999999);
+});
+
+/* ─── CREDIT DISPLAY ─── */
+function updateCreditDisplay() {
+  document.getElementById('creditDisplay').textContent = state.credits;
+}
+
+/* ─── TOAST ─── */
+function showToast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+/* ─── GENERATION ─── */
+const STEPS = [
+  'Initializing AI model…',
+  'Processing prompt…',
+  'Encoding latent space…',
+  'Diffusion in progress…',
+  'Refining details…',
+  'Applying style…',
+  'Enhancing resolution…',
+  'Final touches…',
+  'Rendering output…'
+];
+
+async function runGeneration() {
+  if (state.generating) return;
+  const prompt = promptInput.value.trim();
+  if (!prompt) { showToast('Please enter a prompt first!', 'warn'); return; }
+
+  const cost = MODEL_COSTS[state.selectedModel] * state.batch;
+  if (state.credits < cost) {
+    showToast('Not enough credits! Please upgrade.', 'error');
+    openModal('upgradeModal');
+    return;
+  }
+
+  state.generating = true;
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+  document.getElementById('genBtnText').textContent = '⏳ Generating…';
+
+  // Update status
+  document.getElementById('statusChip').textContent = '🔄 Generating…';
+  document.getElementById('statusChip').className = 'status-chip active';
+
+  // Show progress
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('imageGrid').style.display = 'none';
+  document.getElementById('progressWrap').classList.remove('hidden');
+
+  const totalSteps = parseInt(document.getElementById('stepsRange').value);
+  const circle = document.getElementById('progressCircle');
+  const circumference = 263.9;
+
+  for (let step = 0; step <= totalSteps; step++) {
+    await sleep(60);
+    const pct = Math.round((step / totalSteps) * 100);
+    const offset = circumference - (pct / 100) * circumference;
+    circle.style.strokeDashoffset = offset;
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressStep').textContent = `Step ${step} / ${totalSteps}`;
+    document.getElementById('progressLabel').textContent = STEPS[Math.floor((step / totalSteps) * (STEPS.length - 1))];
+  }
+
+  // Generate images
+  const newImages = [];
+  for (let i = 0; i < state.batch; i++) {
+    newImages.push({
+      id: Date.now() + i,
+      src: nextPlaceholder(state.selectedSize.w, state.selectedSize.h),
+      prompt,
+      negPrompt: document.getElementById('negPrompt').value,
+      model: MODEL_NAMES[state.selectedModel],
+      style: state.selectedStyle,
+      size: `${state.selectedSize.w}×${state.selectedSize.h}`,
+      steps: totalSteps,
+      cfg: document.getElementById('cfgRange').value,
+      seed: document.getElementById('seedInput').value,
+      timestamp: new Date().toLocaleTimeString(),
+    });
+  }
+
+  state.credits -= cost;
+  updateCreditDisplay();
+  state.images = newImages;
+  state.history = [...newImages, ...state.history].slice(0, 20);
+
+  // Show images
+  document.getElementById('progressWrap').classList.add('hidden');
+  renderImages(newImages);
+  renderHistory();
+
+  state.generating = false;
+  btn.disabled = false;
+  document.getElementById('genBtnText').textContent = '✦ Generate Image';
+  document.getElementById('statusChip').textContent = `✅ Done — ${newImages.length} image${newImages.length > 1 ? 's' : ''}`;
+  document.getElementById('statusChip').className = 'status-chip done';
+  showToast(`Generated ${newImages.length} image${newImages.length > 1 ? 's' : ''}! (−${cost} credits)`, 'success');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function renderImages(images) {
+  const grid = document.getElementById('imageGrid');
+  const cols = images.length === 1 ? 'cols-1' : images.length === 2 ? 'cols-2' : 'cols-4';
+  grid.className = `canvas-grid ${cols}`;
+  grid.innerHTML = '';
+  images.forEach(img => {
+    const card = document.createElement('div');
+    card.className = 'image-card';
+    card.innerHTML = `
+      <img src="${img.src}" alt="${img.prompt}" loading="lazy">
+      <div class="image-card-overlay">
+        <div class="image-actions">
+          <button class="img-btn primary" onclick="openImageModal(${img.id})">🔍 View</button>
+          <button class="img-btn" onclick="downloadImage('${img.src}','image.png')">⬇</button>
+          <button class="img-btn" onclick="generateVariation(${img.id})">🎲</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+  grid.style.display = 'grid';
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyImages');
+  if (state.history.length === 0) {
+    container.innerHTML = '<div class="history-empty">No generations yet</div>';
+    return;
+  }
+  container.innerHTML = state.history.map(img => `
+    <div class="history-thumb" onclick="openImageModal(${img.id})">
+      <img src="${img.src}" alt="">
+    </div>
+  `).join('');
+}
+
+/* ─── IMAGE MODAL ─── */
+function openImageModal(id) {
+  const img = [...state.images, ...state.history].find(i => i.id === id);
+  if (!img) return;
+  state.currentImage = img;
+  document.getElementById('modalImg').src = img.src;
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="meta-item"><div class="meta-key">Model</div><div class="meta-val">${img.model}</div></div>
+    <div class="meta-item"><div class="meta-key">Size</div><div class="meta-val">${img.size}</div></div>
+    <div class="meta-item"><div class="meta-key">Style</div><div class="meta-val">${img.style === 'none' ? 'Default' : img.style}</div></div>
+    <div class="meta-item"><div class="meta-key">Steps</div><div class="meta-val">${img.steps}</div></div>
+    <div class="meta-item"><div class="meta-key">CFG Scale</div><div class="meta-val">${img.cfg}</div></div>
+    <div class="meta-item"><div class="meta-key">Seed</div><div class="meta-val">${img.seed === '-1' ? 'Random' : img.seed}</div></div>
+    <div class="meta-item" style="grid-column:1/-1"><div class="meta-key">Prompt</div><div class="meta-val" style="color:var(--text2);font-size:12px;line-height:1.6">${img.prompt}</div></div>
+  `;
+  openModal('imageModal');
+}
+
+function downloadImage(src, name) {
+  const a = document.createElement('a');
+  a.href = src; a.download = name; a.target = '_blank';
+  a.click();
+  showToast('Download started!');
+}
+
+function generateVariation(id) {
+  closeModal('imageModal');
+  showToast('Generating variation…', 'success');
+  document.getElementById('btnGenerate').click();
+}
+
+/* ─── MODAL HELPERS ─── */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.getElementById('modalClose').onclick = () => closeModal('imageModal');
+document.getElementById('upgradeClose').onclick = () => closeModal('upgradeModal');
+document.getElementById('btnUpgrade').onclick = () => openModal('upgradeModal');
+
+document.querySelectorAll('.modal-backdrop').forEach(b => {
+  b.addEventListener('click', (e) => {
+    if (e.target === b) b.classList.remove('open');
+  });
+});
+
+document.getElementById('btnDownload').onclick = () => {
+  if (state.currentImage) downloadImage(state.currentImage.src, 'novamind-ai.png');
+};
+document.getElementById('btnVariation').onclick = () => generateVariation(state.currentImage?.id);
+document.getElementById('btnUpscale').onclick = () => {
+  showToast('Upscaling uses 5 credits (Pro feature)', 'warn');
+};
+document.getElementById('btnShare').onclick = () => {
+  navigator.clipboard?.writeText(state.currentImage?.src || '');
+  showToast('Link copied!');
+};
+
+/* ─── UPGRADE CREDITS ─── */
+function addCredits(amount) {
+  state.credits += amount;
+  updateCreditDisplay();
+  closeModal('upgradeModal');
+  showToast(`+${amount} credits added! 🎉`, 'success');
+}
+
+/* ─── GENERATE BUTTON ─── */
+document.getElementById('btnGenerate').addEventListener('click', runGeneration);
+
+/* ─── KEYBOARD SHORTCUT ─── */
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    runGeneration();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+/* ─── INIT ─── */
+updateCostPreview();
+updateCreditDisplay();
+</script>
+</body>
+</html>
